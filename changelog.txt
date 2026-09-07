@@ -1,7 +1,16 @@
+1.6.565
+- Fixed the moon breathing secondary particles (the moons are only for kokushibo sword)
+- Added compatibility with 3dd-skin-layers mod
+- Fixed weird floating pixels on the Daughter entity
+
 1.6.564
 - Added demons for all the other default skins (ari, efe, noor...)
 - Made civilian protection less demon slayer spammy (max 5 demon slayers from civilian protection instead of 10)
 - Added more attacks and abilities to the Mantis Demon
+- Made Kanroji slightly shorter (she was giant)
+- Added thickness to the sword slashes (configurable)
+- Added option to put a particle trail on the sword slashes (configurable)
+- Added secondary particles for a more diverse particle trail
 
 1.6.563
 - Added ability to input offsets for your demon eyes

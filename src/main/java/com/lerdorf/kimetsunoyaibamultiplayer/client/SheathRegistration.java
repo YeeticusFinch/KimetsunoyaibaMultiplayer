@@ -34,6 +34,21 @@ public class SheathRegistration {
         // Set the default sheath for all swords
         SwordSheathRegistry.setDefaultSheath(SheathItems.SWORD_SHEATH.get());
 
+        // Register the custom sheath for the base mod's saber (if it exists)
+        net.minecraft.world.item.Item baseModSaber =
+            net.minecraftforge.registries.ForgeRegistries.ITEMS
+                .getValue(new ResourceLocation("kimetsunoyaiba", "saber"));
+
+        if (baseModSaber != null) {
+            SwordSheathRegistry.registerPersistentSheath(
+                baseModSaber,
+                SheathItems.SHEATH_SABER.get()
+            );
+            if (Config.logDebug) {
+                Log.info("Registered saber sheath for base mod's saber");
+            }
+        }
+
         // Register kanroji sheath for our mod's kanroji sword
         SwordSheathRegistry.registerPersistentSheath(
             ModItems.NICHIRINSWORD_KANROJI.get(),

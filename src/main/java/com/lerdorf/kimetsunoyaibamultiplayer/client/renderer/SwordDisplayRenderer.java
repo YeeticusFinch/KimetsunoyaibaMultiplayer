@@ -123,8 +123,8 @@ public class SwordDisplayRenderer extends RenderLayer<AbstractClientPlayer, Play
             renderSwordOnBack(poseStack, player, isLeft, sword);
         }
 
-        // Apply scale from config
-        float scale = (float) SwordDisplayConfig.scale;
+        // Apply global and per-sword scale from config
+        float scale = resolveDisplayScale(sword, isLeft, position);
         poseStack.scale(scale, scale, scale);
 
         // Render the sheath first (behind the sword) if enabled
@@ -174,8 +174,8 @@ public class SwordDisplayRenderer extends RenderLayer<AbstractClientPlayer, Play
             renderSwordOnBack(poseStack, player, isLeft, swordStack);
         }
 
-        // Apply scale from config
-        float scale = (float) SwordDisplayConfig.scale;
+        // Apply global and per-sword scale from config
+        float scale = resolveDisplayScale(swordStack, isLeft, position);
         poseStack.scale(scale, scale, scale);
 
         // Render the sheath
@@ -294,6 +294,19 @@ public class SwordDisplayRenderer extends RenderLayer<AbstractClientPlayer, Play
             poseStack.mulPose(Axis.YP.rotationDegrees((float) (SwordDisplayConfig.backRightRotateY + (customOffsets != null ? customOffsets.rotateY : 0.0))));
             poseStack.mulPose(Axis.XP.rotationDegrees((float) (SwordDisplayConfig.backRightRotateX + (customOffsets != null ? customOffsets.rotateX : 0.0))));
         }
+    }
+
+    private static float resolveDisplayScale(ItemStack sword, boolean isLeft,
+                                             SwordDisplayConfig.SwordDisplayPosition position) {
+        ResourceLocation itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(sword.getItem());
+        SwordDisplayConfig.SwordOffsets customOffsets = itemId == null ? null : SwordDisplayConfig.getSwordOffsets(
+            itemId.toString(),
+            position == SwordDisplayConfig.SwordDisplayPosition.BACK
+                ? (isLeft ? SwordDisplayConfig.SwordDisplaySlot.BACK_LEFT : SwordDisplayConfig.SwordDisplaySlot.BACK_RIGHT)
+                : (isLeft ? SwordDisplayConfig.SwordDisplaySlot.HIP_LEFT : SwordDisplayConfig.SwordDisplaySlot.HIP_RIGHT)
+        );
+        double customScale = customOffsets == null ? 1.0D : customOffsets.scale;
+        return (float) (SwordDisplayConfig.scale * customScale);
     }
 
 }

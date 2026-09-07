@@ -130,13 +130,14 @@ public class SwordSlashRenderer {
         
         // Use GeckoLib or your own model render
         // Pass maximum white color values - brightness multiplier will boost these further
-        model.renderToBuffer(
-            poseStack,
-            vertexConsumer,
-            0xF000F0,                   // full bright light (max brightness, no shadows)
-            OverlayTexture.NO_OVERLAY,
-            1f, 1f, 1f, alpha           // base white color (multiplied by brightnessMultiplier in model)
-        );
+            model.renderToBuffer(
+                poseStack,
+                vertexConsumer,
+                0xF000F0,                   // full bright light (max brightness, no shadows)
+                OverlayTexture.NO_OVERLAY,
+                1f, 1f, 1f, alpha,          // base white color (multiplied by brightnessMultiplier in model)
+                texture
+            );
     }
 
     /**
@@ -178,6 +179,7 @@ public class SwordSlashRenderer {
      */
     public static void clearCache() {
         MODEL_CACHE.clear();
+        com.lerdorf.kimetsunoyaibamultiplayer.client.models.SwordSlashModel.clearAlphaMaskCache();
         Log.info("Cleared sword slash model cache");
     }
 }

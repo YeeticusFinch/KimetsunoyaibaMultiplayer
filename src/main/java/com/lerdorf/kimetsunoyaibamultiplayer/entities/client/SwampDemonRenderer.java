@@ -32,6 +32,7 @@ public class SwampDemonRenderer extends GeoEntityRenderer<SwampDemonEntity> {
 
     public SwampDemonRenderer(EntityRendererProvider.Context context) {
         super(context, BASE_MODEL);
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
         this.addRenderLayer(new GeoEquipmentLayer<>(this));
     }
 }

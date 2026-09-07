@@ -6,6 +6,7 @@ import com.lerdorf.kimetsunoyaibamultiplayer.client.renderer.DemonEyesPlayerLaye
 import com.lerdorf.kimetsunoyaibamultiplayer.client.renderer.NezukoBoxBackLayer;
 import com.lerdorf.kimetsunoyaibamultiplayer.client.renderer.SwordDisplayRenderer;
 import com.lerdorf.kimetsunoyaibamultiplayer.entities.client.GeoSwordDisplayLayer;
+import com.lerdorf.kimetsunoyaibamultiplayer.entities.client.SkinLayersGeoLayer;
 import net.minecraft.client.Minecraft;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 import software.bernie.geckolib.core.animatable.GeoAnimatable;
@@ -59,6 +60,7 @@ public class SwordDisplayRendererSetup {
             EntityRenderer<?> renderer = event.getRenderer(livingType);
             if (renderer instanceof GeoEntityRenderer<?> geoRenderer) {
                 addGeoSwordLayer(geoRenderer, id);
+                addSkinLayers(geoRenderer, id);
             }
         }
     }
@@ -67,6 +69,12 @@ public class SwordDisplayRendererSetup {
     private static void addGeoSwordLayer(GeoEntityRenderer geoRenderer, ResourceLocation id) {
         geoRenderer.addRenderLayer(new GeoSwordDisplayLayer(geoRenderer));
         Log.debug("Added sword display layer to base mod entity renderer {}", id);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void addSkinLayers(GeoEntityRenderer geoRenderer, ResourceLocation id) {
+        geoRenderer.addRenderLayer(new SkinLayersGeoLayer(geoRenderer));
+        Log.debug("Added 3D skin layer integration to base mod entity renderer {}", id);
     }
 
     private static void addLayerToPlayerSkin(EntityRenderersEvent.AddLayers event, String skinName) {

@@ -31,6 +31,7 @@ public class MantisDemonRenderer extends GeoEntityRenderer<MantisDemonEntity> {
 
     public MantisDemonRenderer(EntityRendererProvider.Context context) {
         super(context, MODEL);
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
         this.addRenderLayer(new EyesGlowLayer<>(this, "geo/biped_mantis_demon.geo.json",
             "textures/entity/mantis_demon_eyes.png", "animations/biped.animation.json"));
     }

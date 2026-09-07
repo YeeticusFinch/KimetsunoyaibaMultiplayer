@@ -636,6 +636,10 @@ Side labels use Forge's config registration type:
 | `general.model_scale` | Scale/size of the sword slash models<br>Higher values = larger slashes<br>Range: 0.1 to 5.0, Default: 0.5 |
 | `general.animation_duration_ms` | Duration of slash animation in milliseconds<br>Lower values = faster slashes<br>Range: 50 to 1000, Default: 150 (3 ticks) |
 | `general.brightness_multiplier` | Brightness multiplier for sword slash models<br>Higher values = brighter glow (values >1.0 create bloom with shaders)<br>Range: 1.0 to 10.0, Default: 5.0 |
+| `general.enable_voxel_thickness` | Add voxel-style thickness to the opaque edges of slash textures<br>Set to false to render the original flat slash planes<br>Default: true |
+| `general.voxel_thickness` | Thickness of the voxel-style slash edge extrusion, in blocks<br>Range: 0.0 to 1.0, Default: 0.04 |
+| `general.enable_particle_trail` | Spawn breathing-style particles along each 3D sword slash<br>Set to true to add a particle trail whenever a slash model spawns<br>Default: false |
+| `general.particle_trail_spacing_degrees` | Angular spacing between particles along the slash path<br>Lower values create a denser trail<br>Range: 0.1 to 180.0, Default: 10.0 |
 | `advanced.global.yaw_offset` | Global yaw rotation offset (degrees)<br>Range: -180 to 180, Default: 0 |
 | `advanced.global.pitch_offset` | Global pitch rotation offset (degrees)<br>Range: -180 to 180, Default: 0 |
 | `advanced.global.roll_offset` | Global roll rotation offset (degrees)<br>Range: -180 to 180, Default: 0 |

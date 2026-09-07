@@ -25,6 +25,7 @@ public class KazumiRenderer extends GeoEntityRenderer<KazumiEntity> {
                 return ResourceLocation.fromNamespaceAndPath(KimetsunoyaibaMultiplayer.MODID, "animations/biped.animation.json");
             }
         });
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
     }
 
     @Override

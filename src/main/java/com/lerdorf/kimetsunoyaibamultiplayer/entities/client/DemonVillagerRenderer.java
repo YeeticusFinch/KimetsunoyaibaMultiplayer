@@ -36,6 +36,7 @@ public class DemonVillagerRenderer extends GeoEntityRenderer<DemonVillagerEntity
         super(context, BASE_MODEL);
         this.addRenderLayer(new EyesGlowLayer<>(this, "geo/biped_villager.geo.json",
             "textures/entity/demon_villager_eyes.png", "animations/biped.animation.json"));
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
         this.addRenderLayer(new ClothesLayer(this));
     }
 

@@ -8,11 +8,13 @@ import com.lerdorf.kimetsunoyaibamultiplayer.config.SwordSwingConfig;
 import com.lerdorf.kimetsunoyaibamultiplayer.items.CustomDemonArtItem;
 import com.lerdorf.kimetsunoyaibamultiplayer.items.ModItems;
 import com.lerdorf.kimetsunoyaibamultiplayer.entities.MantisDemonEntity;
+import com.lerdorf.kimetsunoyaibamultiplayer.particles.SwordParticleMapping;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
@@ -21,6 +23,7 @@ import java.util.UUID;
 
 public class BonePositionTracker {
 	private static int particlesSpawnedThisTick = 0;
+	private static final float PARTICLE_TRAIL_LEAD_DEGREES = 45.0F;
 	private static final Map<UUID, Long> lastAnimationTime = new HashMap<>();
 
 	// =====================
@@ -1032,7 +1035,7 @@ public class BonePositionTracker {
 				}
 
 				// Create new model - it will self-animate based on elapsed time
-				renderQueue.add(new SlashRenderRequest(modelKey, entityId, animationName, entity,
+				addSlashRenderRequest(new SlashRenderRequest(modelKey, entityId, animationName, entity,
 						isHorizontal, isVertical, isSpin, angle, upward));
 	}
 	
@@ -1050,7 +1053,7 @@ public class BonePositionTracker {
 		}
 
 		// Create new model - it will self-animate based on elapsed time
-		renderQueue.add(new SlashRenderRequest(modelKey, entityId, animationName, entity,
+		addSlashRenderRequest(new SlashRenderRequest(modelKey, entityId, animationName, entity,
 				isHorizontal, isVertical, isSpin, leftToRight, upward, leftHand));
 	}
 
@@ -1069,7 +1072,7 @@ public class BonePositionTracker {
 		}
 
 		// Create new raw slash model with full parameter control
-		renderQueue.add(new SlashRenderRequest(modelKey, entityId, animationName, entity,
+		addSlashRenderRequest(new SlashRenderRequest(modelKey, entityId, animationName, entity,
 				angle, arcRange, duration, yawOffset, pitchOffset, rollOffset,
 				radiusScaler, sizeScaler, angleOffset, reverse));
 	}
@@ -1089,7 +1092,7 @@ public class BonePositionTracker {
 		}
 
 		// Create new raw horizontal slash model with full parameter control
-		renderQueue.add(new SlashRenderRequest(modelKey, entityId, animationName, entity,
+		addSlashRenderRequest(new SlashRenderRequest(modelKey, entityId, animationName, entity,
 				vert, arcRange, duration, yawOffset, pitchOffset, rollOffset,
 				radiusScaler, sizeScaler, angleOffset, reverse, posOffset));
 	}
@@ -1109,9 +1112,94 @@ public class BonePositionTracker {
 		}
 
 		// Create new raw vertical slash model with full parameter control
-		renderQueue.add(new SlashRenderRequest(modelKey, entityId, animationName, entity,
+		addSlashRenderRequest(new SlashRenderRequest(modelKey, entityId, animationName, entity,
 				0, true, arcRange, duration, yawOffset, pitchOffset, rollOffset,
 				radiusScaler, sizeScaler, angleOffset, reverse, posOffset, vert));
+	}
+
+	private static void addSlashRenderRequest(SlashRenderRequest request) {
+		renderQueue.add(request);
+		if (SwordSwingConfig.enableParticleTrail) {
+			spawnSlashParticleTrail(request);
+		}
+	}
+
+	private static void spawnSlashParticleTrail(SlashRenderRequest request) {
+		if (request.entity == null) {
+			return;
+		}
+
+		ItemStack swordItem = request.leftHand ? request.entity.getOffhandItem() : request.entity.getMainHandItem();
+		if (swordItem.isEmpty()) {
+			return;
+		}
+
+		Minecraft minecraft = Minecraft.getInstance();
+		ClientLevel level = minecraft.level;
+		if (level == null) {
+			return;
+		}
+
+		float spacing = Math.max(0.1F, SwordSwingConfig.particleTrailSpacingDegrees);
+		float arcDegrees = getSlashArcDegrees(request);
+		int steps = Math.max(1, (int) Math.ceil(Math.abs(arcDegrees) / spacing));
+		for (int step = 0; step <= steps; step++) {
+			float progress = step / (float) steps;
+			Vec3 position = getSlashPathPosition(request, progress, PARTICLE_TRAIL_LEAD_DEGREES);
+			if (position == null) {
+				continue;
+			}
+			if (ParticleConfig.maxParticlesPerTick > 0
+					&& step >= ParticleConfig.maxParticlesPerTick) {
+				break;
+			}
+			ParticleOptions particleType = SwordParticleMapping.getParticleForSwordTrail(swordItem, request.entity);
+			if (particleType != null) {
+				level.addParticle(particleType, position.x, position.y, position.z, 0.0, 0.0, 0.0);
+			}
+		}
+	}
+
+	private static float getSlashArcDegrees(SlashRenderRequest request) {
+		if (request.isRawSlash || request.isRawHorizontal || request.isRawVertical) {
+			return request.arcRange;
+		}
+		return request.isSpin ? 360.0F : (float) ParticleConfig.particleArcDegrees;
+	}
+
+	private static Vec3 getSlashPathPosition(SlashRenderRequest request, float progress, float leadDegrees) {
+		if (leadDegrees != 0.0F) {
+			float sweepDegrees = getSlashSweepDegrees(request);
+			if (Math.abs(sweepDegrees) > 0.0001F) {
+				// Sample ahead in animation time; the signed sweep determines the
+				// resulting angular direction, including reversed raw slashes.
+				progress += leadDegrees / Math.abs(sweepDegrees);
+			}
+		}
+
+		if (request.isRawSlash) {
+			return calculateRawSlashPosition(request.entity, progress, request);
+		}
+		if (request.isRawHorizontal) {
+			return calculateRawHorizontalPosition(request.entity, progress, request);
+		}
+		if (request.isRawVertical) {
+			return calculateRawVerticalPosition(request.entity, progress, request);
+		}
+		if (request.isHorizontal) {
+			return calculateHorizontalPosition(request.entity, progress, request.leftToRight, request.leftHand);
+		}
+		if (request.isVertical) {
+			return calculateVerticalPosition(request.entity, progress, request.upward, request.leftHand);
+		}
+		if (request.isSpin) {
+			return calculateSpinPosition(request.entity, progress);
+		}
+		return null;
+	}
+
+	private static float getSlashSweepDegrees(SlashRenderRequest request) {
+		return getSlashArcDegrees(request);
 	}
 
 	// Helper methods to calculate position based on animation type and progress

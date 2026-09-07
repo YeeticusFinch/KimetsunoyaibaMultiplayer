@@ -20,9 +20,11 @@ import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class SwordParticleMapping {
     // Items exempt from sword sheath display (e.g., Himejima's axe and ball)
@@ -39,6 +41,24 @@ public class SwordParticleMapping {
     //private static final Log Log = LogUtils.getLog();
 
     private static final Map<String, ResourceLocation> SWORD_TO_PARTICLE_MAP = new HashMap<>();
+    private static final Map<String, List<ResourceLocation>> STYLE_TO_SECONDARY_PARTICLES = Map.of(
+        "flame_breathing", List.of(
+            ResourceLocation.fromNamespaceAndPath("kimetsunoyaiba", "particle_flame"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "flame")),
+        "thunder_breathing", List.of(
+            ResourceLocation.fromNamespaceAndPath("kimetsunoyaiba", "particle_lightning"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "electric_spark")),
+        "sound_breathing", List.of(
+            ResourceLocation.fromNamespaceAndPath("kimetsunoyaiba", "particle_spark_fire")),
+        "water_breathing", List.of(
+            ResourceLocation.fromNamespaceAndPath("kimetsunoyaiba", "water")),
+        "flower_breathing", List.of(
+            ResourceLocation.fromNamespaceAndPath("minecraft", "cherry_leaves")),
+        "moon_breathing", List.of(
+            ResourceLocation.fromNamespaceAndPath("minecraft", "end_rod")));
+    private static final ParticleOptions MIST_COLORED_DUST_PARTICLE = new DustParticleOptions(
+        new Vector3f(138.0F / 255.0F, 195.0F / 255.0F, 194.0F / 255.0F), 0.5F);
+    private static final ParticleOptions MOON_ENERGY_PARTICLE = new EnergyParticleOptions(255, 169, 250, 1.0F);
     private static final ParticleOptions DEMONIZED_SERPENT_PARTICLE =
         new DustParticleOptions(new Vector3f(0.0F, 0.0F, 0.0F), 1.0F);
 
@@ -144,9 +164,62 @@ public class SwordParticleMapping {
         return getParticleForSword(swordItem, isDemonizedWielder(wielder));
     }
 
+    /**
+     * Selects a particle for a slash trail. Two out of three outcomes use the
+     * sword's primary particle; the remaining outcome randomly selects one of
+     * the secondary particles registered for its breathing style.
+     */
+    public static ParticleOptions getParticleForSwordTrail(ItemStack swordItem, LivingEntity wielder) {
+        String styleId = getBreathingStyleId(swordItem);
+        ParticleOptions primary = "moon_breathing".equals(styleId)
+            ? MOON_ENERGY_PARTICLE
+            : getParticleForSword(swordItem, wielder);
+        if (primary == null) {
+            return null;
+        }
+
+        if ("mist_breathing".equals(styleId)) {
+            primary = (ParticleOptions) ModParticles.SMALL_MIST_PARTICLE.get();
+            if (ThreadLocalRandom.current().nextInt(3) < 2) {
+                return primary;
+            }
+            return MIST_COLORED_DUST_PARTICLE;
+        }
+
+        List<ResourceLocation> secondaryIds = "moon_breathing".equals(styleId)
+            ? List.of(getMoonSecondaryParticleId(swordItem))
+            : getSecondaryParticleIds(swordItem);
+        if (secondaryIds.isEmpty() || ThreadLocalRandom.current().nextInt(3) < 2) {
+            return primary;
+        }
+
+        ResourceLocation secondaryId = secondaryIds.get(ThreadLocalRandom.current().nextInt(secondaryIds.size()));
+        ParticleOptions secondary = getParticleOption(secondaryId);
+        return secondary != null ? secondary : primary;
+    }
+
+    private static ResourceLocation getMoonSecondaryParticleId(ItemStack swordItem) {
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(swordItem.getItem());
+        if (itemId != null) {
+            if ("sword_kokushibo_1".equals(itemId.getPath())) {
+                return ResourceLocation.fromNamespaceAndPath("kimetsunoyaiba", "particle_moon_1");
+            }
+            if ("sword_kokushibo_2".equals(itemId.getPath())) {
+                return ResourceLocation.fromNamespaceAndPath("kimetsunoyaiba", "particle_moon_2");
+            }
+        }
+        return ResourceLocation.fromNamespaceAndPath("minecraft", "end_rod");
+    }
+
     public static ParticleOptions getParticleForSword(ItemStack swordItem, boolean demonizedWielder) {
         if (swordItem.isEmpty()) {
             return null;
+        }
+
+        // Moon-style base-mod swords do not use the nichirinsword_ naming
+        // convention, so resolve their shared primary particle first.
+        if ("moon_breathing".equals(getBreathingStyleId(swordItem))) {
+            return MOON_ENERGY_PARTICLE;
         }
 
         if (demonizedWielder && shouldUseDemonizedSerpentParticle(swordItem)) {
@@ -220,6 +293,47 @@ public class SwordParticleMapping {
         if (Config.logDebug)
         	Log.debug("No particle found for sword {}, using fallback particle", itemId);
         return ParticleTypes.CLOUD;
+    }
+
+    private static List<ResourceLocation> getSecondaryParticleIds(ItemStack swordItem) {
+        String styleId = getBreathingStyleId(swordItem);
+        return styleId == null ? List.of() : STYLE_TO_SECONDARY_PARTICLES.getOrDefault(styleId, List.of());
+    }
+
+    private static String getBreathingStyleId(ItemStack swordItem) {
+        if (swordItem == null || swordItem.isEmpty()) {
+            return null;
+        }
+
+        SwordRegistry.RegisteredSword registeredSword = SwordRegistry.getSword(swordItem.getItem());
+        if (registeredSword != null && registeredSword.getStyleId() != null) {
+            return registeredSword.getStyleId();
+        }
+
+        SwordMetadataRegistry.SwordMetadata metadata = SwordMetadataRegistry.getMetadata(swordItem.getItem());
+        if (metadata != null && metadata.getStyleId() != null) {
+            return metadata.getStyleId();
+        }
+
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(swordItem.getItem());
+        if (itemId == null) {
+            return null;
+        }
+
+        String path = itemId.getPath().toLowerCase(Locale.ROOT);
+        if (path.contains("flame") || path.contains("rengoku")) return "flame_breathing";
+        if (path.contains("thunder") || path.contains("zenitsu") || path.contains("kaigaku")) return "thunder_breathing";
+        if (path.contains("water") || path.contains("tomioka") || path.contains("tanjiro")) return "water_breathing";
+        if (path.contains("flower") || path.contains("kanae") || path.contains("kanawo")) return "flower_breathing";
+        if (path.contains("moon") || path.contains("kokushibo")) return "moon_breathing";
+        return null;
+    }
+
+    private static ParticleOptions getParticleOption(ResourceLocation particleId) {
+        if (!BuiltInRegistries.PARTICLE_TYPE.containsKey(particleId)) {
+            return null;
+        }
+        return (ParticleOptions) BuiltInRegistries.PARTICLE_TYPE.get(particleId);
     }
 
     public static boolean isSerpentBreathingSword(ItemStack swordItem) {
@@ -331,7 +445,7 @@ public class SwordParticleMapping {
         // Check if this is a kimetsunoyaiba nichirin sword or our mod's breathing swords
         // Note: "nichirinsword" (base, no suffix) is also a valid sword
         String path = itemId.getPath();
-        return (itemId.getNamespace().equals("kimetsunoyaiba") && (path.equals("nichirinsword") || path.startsWith("nichirinsword_") || path.startsWith("sword_kokushibo") || path.equals("sword_hairo"))) ||
+        return (itemId.getNamespace().equals("kimetsunoyaiba") && (path.equals("nichirinsword") || path.startsWith("nichirinsword_") || path.startsWith("sword_kokushibo") || path.equals("sword_hairo") || path.equals("saber"))) ||
                (itemId.getNamespace().equals("kimetsunoyaibamultiplayer") && path.startsWith("nichirinsword_"));
     }
 

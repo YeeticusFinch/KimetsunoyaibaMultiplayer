@@ -30,5 +30,6 @@ public class DemonPillagerRenderer extends GeoEntityRenderer<DemonPillagerEntity
         this.addRenderLayer(new EyesGlowLayer<>(this, "geo/biped_pillager.geo.json",
             "textures/entity/demon_pillager_eyes.png", "animations/biped.animation.json"));
         this.addRenderLayer(new GeoEquipmentLayer<>(this));
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
     }
 }

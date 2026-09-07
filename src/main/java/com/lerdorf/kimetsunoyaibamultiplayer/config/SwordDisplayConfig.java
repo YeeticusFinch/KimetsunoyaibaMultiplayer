@@ -517,16 +517,32 @@ public class SwordDisplayConfig {
         public double rotateX = 0.0;
         public double rotateY = 0.0;
         public double rotateZ = 0.0;
+        /** Per-sword uniform scale multiplier, applied on top of the global display scale. */
+        public double scale = 1.0;
 
-        public SwordOffsets() {}
+        public SwordOffsets() {
+        }
 
         public SwordOffsets(double tx, double ty, double tz, double rx, double ry, double rz) {
+                this.translateX = tx;
+                this.translateY = ty;
+                this.translateZ = tz;
+                this.rotateX = rx;
+                this.rotateY = ry;
+                this.rotateZ = rz;
+        }
+        
+        /**
+         * Creates offsets with a per-sword uniform scale multiplier.
+         */
+        public SwordOffsets(double tx, double ty, double tz, double rx, double ry, double rz, double scale) {
             this.translateX = tx;
             this.translateY = ty;
             this.translateZ = tz;
             this.rotateX = rx;
             this.rotateY = ry;
             this.rotateZ = rz;
+            this.scale = scale;
         }
     }
 

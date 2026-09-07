@@ -122,13 +122,14 @@ public class DualLayerSlashRenderer {
 
         // Render model to buffer
         // Color multiplier applied inside model's renderToBuffer
-        model.renderToBuffer(
-            poseStack,
-            vertexConsumer,
-            0xF000F0,  // Full bright
-            net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
-            red * colorMultiplier, green * colorMultiplier, blue * colorMultiplier, alpha
-        );
+            model.renderToBuffer(
+                poseStack,
+                vertexConsumer,
+                0xF000F0,  // Full bright
+                net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
+                red * colorMultiplier, green * colorMultiplier, blue * colorMultiplier, alpha,
+                texture
+            );
     }
 
     /**

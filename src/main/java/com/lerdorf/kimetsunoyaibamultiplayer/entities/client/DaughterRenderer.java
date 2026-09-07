@@ -55,6 +55,7 @@ public class DaughterRenderer extends GeoEntityRenderer<DaughterEntity> {
         // The Daughter renders at 85% of her model's native size.
         this.withScale(0.85F);
         this.addRenderLayer(new GeoEquipmentLayer<>(this));
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
         this.addRenderLayer(new DaughterEyesLayer(this));
     }
 

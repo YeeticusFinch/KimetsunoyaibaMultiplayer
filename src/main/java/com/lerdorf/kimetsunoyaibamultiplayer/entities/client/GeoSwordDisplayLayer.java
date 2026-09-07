@@ -161,7 +161,7 @@ public class GeoSwordDisplayLayer<T extends LivingEntity & GeoAnimatable> extend
             poseStack.translate(0.06D, -0.03D, 0.02D);
         }
 
-        float scale = (float) SwordDisplayConfig.scale;
+        float scale = resolveDisplayScale(swordStack, !isLeft, backPosition);
         poseStack.scale(scale, scale, scale);
         SheathModelRenderer.renderSheath(sheathItem, poseStack, buffer, packedLight, entity.getId());
         poseStack.popPose();
@@ -195,7 +195,7 @@ public class GeoSwordDisplayLayer<T extends LivingEntity & GeoAnimatable> extend
             applyBackPosition(poseStack, !isLeft, sword);
         }
 
-        float scale = (float) SwordDisplayConfig.scale;
+        float scale = resolveDisplayScale(sword, !isLeft, position == SwordDisplayConfig.SwordDisplayPosition.BACK);
         poseStack.scale(scale, scale, scale);
 
         if (SwordDisplayConfig.renderSheaths) {
@@ -267,7 +267,7 @@ public class GeoSwordDisplayLayer<T extends LivingEntity & GeoAnimatable> extend
             applyBackPosition(poseStack, !isLeft, sword);
         }
 
-        float scale = (float) SwordDisplayConfig.scale;
+        float scale = resolveDisplayScale(sword, !isLeft, position == SwordDisplayConfig.SwordDisplayPosition.BACK);
         poseStack.scale(scale, scale, scale);
 
         SheathModelRenderer.renderSheath(sheathItem, poseStack, buffer, packedLight, entity.getId());
@@ -282,6 +282,17 @@ public class GeoSwordDisplayLayer<T extends LivingEntity & GeoAnimatable> extend
 
     private static double resolveEntityRotation(double base, double offset, boolean flip) {
         return (flip ? -base : base) + offset;
+    }
+
+    private static float resolveDisplayScale(ItemStack sword, boolean isLeft, boolean backPosition) {
+        SwordDisplayConfig.SwordOffsets customOffsets = resolveSwordOffsets(
+            sword,
+            backPosition
+                ? (isLeft ? SwordDisplayConfig.SwordDisplaySlot.BACK_LEFT : SwordDisplayConfig.SwordDisplaySlot.BACK_RIGHT)
+                : (isLeft ? SwordDisplayConfig.SwordDisplaySlot.HIP_LEFT : SwordDisplayConfig.SwordDisplaySlot.HIP_RIGHT)
+        );
+        double customScale = customOffsets == null ? 1.0D : customOffsets.scale;
+        return (float) (SwordDisplayConfig.scale * customScale);
     }
 
     private static void applyHipPosition(PoseStack poseStack, boolean isLeft, ItemStack sword) {

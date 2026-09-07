@@ -28,6 +28,7 @@ public class NamedDemonRenderer extends GeoEntityRenderer<NamedDemonEntity> {
                     "animations/biped.animation.json");
             }
         });
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
         this.addRenderLayer(new EyesGlowLayer<>(this, "geo/biped.geo.json",
             "animations/biped.animation.json", NamedDemonEntity::getEyesTexture));
     }

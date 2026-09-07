@@ -20,6 +20,10 @@ public class SheathItems {
     public static final RegistryObject<Item> SWORD_SHEATH = ITEMS.register("sword_sheath",
         () -> new Item(new Item.Properties().stacksTo(1)));
 
+    // Saber-specific sheath
+    public static final RegistryObject<Item> SHEATH_SABER = ITEMS.register("sheath_saber",
+        () -> new Item(new Item.Properties().stacksTo(1)));
+
     // Kanroji-specific sheath
     public static final RegistryObject<Item> SWORD_SHEATH_KANROJI = ITEMS.register("sword_sheath_kanroji",
         () -> new Item(new Item.Properties().stacksTo(1)));

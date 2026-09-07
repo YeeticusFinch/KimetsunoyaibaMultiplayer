@@ -26,6 +26,7 @@ public class KanataRenderer extends GeoEntityRenderer<KanataEntity> {
             }
         });
 
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
         this.scaleHeight = 0.8F;
         this.scaleWidth = 0.8F;
     }

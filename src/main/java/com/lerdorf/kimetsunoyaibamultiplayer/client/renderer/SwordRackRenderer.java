@@ -137,7 +137,9 @@ public class SwordRackRenderer implements BlockEntityRenderer<SwordRackBlockEnti
             poseStack.mulPose(Axis.XP.rotationDegrees((float) offsets.rotateX));
         }
 
-        poseStack.scale((float) SwordDisplayConfig.scale, (float) SwordDisplayConfig.scale, (float) SwordDisplayConfig.scale);
+        double customScale = offsets == null ? 1.0D : offsets.scale;
+        float scale = (float) (SwordDisplayConfig.scale * customScale);
+        poseStack.scale(scale, scale, scale);
     }
 
     private static void applyRackOrientation(BlockState state, PoseStack poseStack) {

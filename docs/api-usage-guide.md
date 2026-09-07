@@ -1550,12 +1550,12 @@ List<Integer> availableEyes = DemonEyesResourceHelper.getAvailableIndices();
 
 The values are stored in the player's persistent NBT using these keys:
 
-| Key | Type | Meaning |
-| --- | --- | --- |
-| `DemonEyesIndex` | Integer | Selected eye resource index |
-| `DemonEyesHue` | Integer | Hue in degrees, normalized to `0` through `359` |
-| `DemonEyesOffsetX` | Float | Horizontal offset in skin pixels |
-| `DemonEyesOffsetY` | Float | Vertical offset in skin pixels; positive values move up |
+| Key                | Type    | Meaning                                                 |
+| ------------------ | ------- | ------------------------------------------------------- |
+| `DemonEyesIndex`   | Integer | Selected eye resource index                             |
+| `DemonEyesHue`     | Integer | Hue in degrees, normalized to `0` through `359`         |
+| `DemonEyesOffsetX` | Float   | Horizontal offset in skin pixels                        |
+| `DemonEyesOffsetY` | Float   | Vertical offset in skin pixels; positive values move up |
 
 `DemonEyesHelper` contains the low-level getters and setters, including `setStyle` and `setOffsets`. Those methods update persistent NBT but do not themselves broadcast a packet. Addons should prefer the matching `KnYAPI` methods so multiplayer clients are updated. Values are copied during `PlayerEvent.Clone` when a player respawns or changes dimensions through the clone flow.
 
@@ -2012,12 +2012,13 @@ KnYAPI.registerSwordOffsets(
     SwordDisplayConfig.SwordDisplaySlot.HIP_LEFT,
     new SwordDisplayConfig.SwordOffsets(
         0.02D, -0.04D, 0.0D,  // translate X/Y/Z
-        0.0D, 0.0D, -5.0D     // rotate X/Y/Z
+        0.0D, 0.0D, -5.0D,     // rotate X/Y/Z
+        1.0D                   // per-sword scale
     )
 );
 ```
 
-Use `SwordDisplaySlot.HIP_LEFT`, `HIP_RIGHT`, `BACK_LEFT`, and `BACK_RIGHT` for position-specific tuning. The legacy `KnYAPI.registerSwordOffsets(itemId, offsets)` applies one offset everywhere. Sword display scale is controlled by the shared sword display config, while sheath-only scale can be adjusted through `SheathModelRenderer.SheathOffsets`.
+Use `SwordDisplaySlot.HIP_LEFT`, `HIP_RIGHT`, `BACK_LEFT`, and `BACK_RIGHT` for position-specific tuning. The legacy `KnYAPI.registerSwordOffsets(itemId, offsets)` applies one offset everywhere. The per-sword scale is multiplied by the shared sword display scale. Sheath-specific scale can also be adjusted through `SheathModelRenderer.SheathOffsets`.
 
 ---
 

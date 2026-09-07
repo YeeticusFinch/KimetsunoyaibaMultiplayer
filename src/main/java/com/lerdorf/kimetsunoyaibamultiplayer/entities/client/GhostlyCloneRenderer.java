@@ -75,6 +75,7 @@ public class GhostlyCloneRenderer extends GeoEntityRenderer<GhostlyCloneEntity> 
 
         // Add equipment rendering layer
         this.addRenderLayer(new GeoEquipmentLayer<>(this));
+        this.addRenderLayer(new SkinLayersGeoLayer<>(this));
 
         // Sword display layer intentionally omitted for ghostly clones
     }

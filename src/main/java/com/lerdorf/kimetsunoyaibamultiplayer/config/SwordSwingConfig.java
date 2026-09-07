@@ -51,6 +51,37 @@ public class SwordSwingConfig {
             )
             .defineInRange("brightness_multiplier", 5.0, 1.0, 10.0);
 
+    private static final ForgeConfigSpec.BooleanValue ENABLE_VOXEL_THICKNESS = BUILDER
+            .comment(
+                    "Add voxel-style thickness to the opaque edges of slash textures",
+                    "Set to false to render the original flat slash planes",
+                    "Default: true"
+            )
+            .define("enable_voxel_thickness", true);
+
+    private static final ForgeConfigSpec.DoubleValue VOXEL_THICKNESS = BUILDER
+            .comment(
+                    "Thickness of the voxel-style slash edge extrusion, in blocks",
+                    "Range: 0.0 to 1.0, Default: 0.04"
+            )
+            .defineInRange("voxel_thickness", 0.04, 0.0, 1.0);
+
+    private static final ForgeConfigSpec.BooleanValue ENABLE_PARTICLE_TRAIL = BUILDER
+            .comment(
+                    "Spawn breathing-style particles along each 3D sword slash",
+                    "Set to true to add a particle trail whenever a slash model spawns",
+                    "Default: false"
+            )
+            .define("enable_particle_trail", false);
+
+    private static final ForgeConfigSpec.DoubleValue PARTICLE_TRAIL_SPACING_DEGREES = BUILDER
+            .comment(
+                    "Angular spacing between particles along the slash path, in degrees",
+                    "Lower values create a denser trail",
+                    "Range: 0.1 to 180.0, Default: 10.0"
+            )
+            .defineInRange("particle_trail_spacing_degrees", 10.0, 0.1, 180.0);
+
     static {
         BUILDER.pop(); // general
     }
@@ -338,6 +369,10 @@ public class SwordSwingConfig {
     public static float modelScale;
     public static int animationDurationMs;
     public static float brightnessMultiplier;
+    public static boolean enableVoxelThickness = true;
+    public static float voxelThickness = 0.04F;
+    public static boolean enableParticleTrail = false;
+    public static float particleTrailSpacingDegrees = 10.0F;
 
     // Global offsets
     public static float globalYawOffset;
@@ -405,6 +440,10 @@ public class SwordSwingConfig {
         modelScale = (float) (double) MODEL_SCALE.get();
         animationDurationMs = ANIMATION_DURATION_MS.get();
         brightnessMultiplier = (float) (double) BRIGHTNESS_MULTIPLIER.get();
+        enableVoxelThickness = ENABLE_VOXEL_THICKNESS.get();
+        voxelThickness = (float) (double) VOXEL_THICKNESS.get();
+        enableParticleTrail = ENABLE_PARTICLE_TRAIL.get();
+        particleTrailSpacingDegrees = (float) (double) PARTICLE_TRAIL_SPACING_DEGREES.get();
 
         // Global offsets
         globalYawOffset = (float) (double) GLOBAL_YAW_OFFSET.get();
